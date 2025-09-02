@@ -1,0 +1,30 @@
+{
+  "variables": {
+    "aws_region": "ap-south-1"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "{{user `aws_region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      },
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "jenkins-ami-{{timestamp}}",
+      "ami_description": "AMI built by Jenkins",
+      "tags": {
+        "Name": "jenkins-ami",
+        "BuiltBy": "Jenkins",
+        "Project": "AMI",
+        "BuildTime": "{{timestamp}}"
+      }
+    }
+  ]
+}
