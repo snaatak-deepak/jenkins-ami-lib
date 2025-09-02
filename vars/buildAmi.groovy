@@ -2,15 +2,11 @@ def call(Map config = [:]) {
     pipeline {
         agent any
 
-        environment {
-            AWS_REGION = config.region ?: 'us-east-1'
-        }
-
         stages {
             stage('Checkout') {
                 steps {
-                    git branch: config.branch ?: 'main',
-                        url: config.repo ?: 'https://github.com/snaatak-deepak/Scripted-Pipeline-AMI.git'
+                    git branch: (config.branch ?: 'main'),
+                        url: (config.repo ?: 'https://github.com/snaatak-deepak/Scripted-Pipeline-AMI.git')
                 }
             }
 
@@ -22,9 +18,16 @@ def call(Map config = [:]) {
 
             stage('Build AMI') {
                 steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                      credentialsId: config.credentialsId ?: 'aws-cred']]) {
-                        sh "packer build -var 'aws_region=${AWS_REGION}' template.json"
+                    script {
+                        def region = config.region ?: 'us-east-1'
+                        def creds = config.credentialsId ?: 'aws-cred'
+
+                        withEnv(["AWS_REGION=${region}"]) {
+                            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                              credentialsId: creds]]) {
+                                sh "packer build -var 'aws_region=${region}' template.json"
+                            }
+                        }
                     }
                 }
             }
